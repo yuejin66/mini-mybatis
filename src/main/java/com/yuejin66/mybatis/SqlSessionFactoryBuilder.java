@@ -21,6 +21,7 @@ import java.util.regex.Pattern;
 /**
  * @author lyj
  */
+@SuppressWarnings("unchecked")
 public class SqlSessionFactoryBuilder {
 
     /**
@@ -53,12 +54,14 @@ public class SqlSessionFactoryBuilder {
     }
 
     // 获取数据源配置信息
-    private Map<String, String> dataSource(List<Node> list) {
+    private Map<String, String> dataSource(List<Element> list) {
         HashMap<String, String> dataSource = new HashMap<>(4);
-        for (Node node : list) {
-            Element element = (Element) node;
-            String name = element.attributeValue("name");
-            String value = element.attributeValue("value");
+        Element element = list.get(0);
+        List content = element.content();
+        for (Object o : content) {
+            Element e = (Element) o;
+            String name = e.attributeValue("name");
+            String value = e.attributeValue("value");
             dataSource.put(name, value);
         }
         return dataSource;
@@ -76,12 +79,13 @@ public class SqlSessionFactoryBuilder {
     }
 
     // 解析 SQL 语句
-    private Map<String, XNode> mapperElement(List<Node> list) {
+    private Map<String, XNode> mapperElement(List<Element> list) {
         Map<String, XNode> map = new HashMap<>();
-
-        for (Node n : list) {
-            Element element_1 = (Element) n;
-            String resource = element_1.attributeValue("resource");
+        Element element = list.get(0);
+        List content = element.content();
+        for (Object o : content) {
+            Element e = (Element) o;
+            String resource = e.attributeValue("resource");
             try {
                 Reader reader = Resources.getResourceAsReader(resource);
                 SAXReader saxReader = new SAXReader();
@@ -90,13 +94,12 @@ public class SqlSessionFactoryBuilder {
                 String namespace = root.attributeValue("namespace");
 
                 // SELECT
-                List<Node> selectNodes = root.selectNodes("select");
-                for (Node node : selectNodes) {
-                    Element element_2 = (Element) node;
-                    String id = element_2.attributeValue("id");
-                    String parameterType = element_2.attributeValue("parameterType");
-                    String resultType = element_2.attributeValue("resultType");
-                    String sql = element_2.getText();
+                List<Element> selectNodes = root.selectNodes("select");
+                for (Element node : selectNodes) {
+                    String id = node.attributeValue("id");
+                    String parameterType = node.attributeValue("parameterType");
+                    String resultType = node.attributeValue("resultType");
+                    String sql = node.getText();
                     // 匹配 "?"
                     HashMap<Integer, String> parameter = new HashMap<>();
                     Pattern pattern = Pattern.compile("(#\\{(.*?)})");
@@ -116,8 +119,8 @@ public class SqlSessionFactoryBuilder {
                     xNode.setParameter(parameter);
                     map.put(namespace + '.' + id, xNode);
                 }
-            } catch (IOException | DocumentException e) {
-                e.printStackTrace();
+            } catch (IOException | DocumentException ex) {
+                ex.printStackTrace();
             }
         }
         return map;

@@ -20,7 +20,7 @@ public class ApiTest {
             SqlSessionFactory sqlMapper = new SqlSessionFactoryBuilder().build(reader);
             SqlSession session = sqlMapper.openSession();
             try {
-                User user = session.selectOne("com.yuejin66.mybatis.dao.UserDao.queryUserInfoById", 1L);
+                User user = session.selectOne("com.yuejin66.mybatis.mapper.UserMapper.queryUserInfoById", 1L);
                 System.out.println(user);
             } finally {
                 session.close();
