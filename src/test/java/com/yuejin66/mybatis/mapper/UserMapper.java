@@ -7,7 +7,7 @@ import com.yuejin66.mybatis.po.User;
  */
 public interface UserMapper {
 
-    User queryUserInfoById(Long id);
+    User queryUserInfo(User user);
 
-    User queryUserList(User user);
+    User queryUserInfoById(Long id);
 }
