@@ -1,7 +1,10 @@
 package com.yuejin66.mybatis;
 
+import com.yuejin66.mybatis.mapper.UserMapper;
 import com.yuejin66.mybatis.po.User;
 import org.junit.Test;
+import org.springframework.beans.factory.BeanFactory;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import java.io.IOException;
 import java.io.Reader;
@@ -50,5 +53,13 @@ public class ApiTest {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    @Test
+    public void test_classPathXmlApplicationContest() {
+        BeanFactory beanFactory = new ClassPathXmlApplicationContext("spring-config.xml");
+        UserMapper userMapper = beanFactory.getBean("userMapper", UserMapper.class);
+        User user = userMapper.queryUserInfoById(1L);
+        System.out.println("测试结果：" + user);
     }
 }
