@@ -19,6 +19,8 @@ public class SqlSessionFactoryBean implements FactoryBean<SqlSessionFactory>, In
 
     private SqlSessionFactory sqlSessionFactory;
 
+    private String basePackage;
+
     @Override
     public SqlSessionFactory getObject() throws Exception {
         return sqlSessionFactory;
@@ -44,5 +46,9 @@ public class SqlSessionFactoryBean implements FactoryBean<SqlSessionFactory>, In
 
     public void setSqlSessionFactory(SqlSessionFactory sqlSessionFactory) {
         this.sqlSessionFactory = sqlSessionFactory;
+    }
+
+    public void setBasePackage(String basePackage) {
+        this.basePackage = basePackage;
     }
 }

@@ -1,0 +1,2 @@
+# 将配置文件加载到 com.yuejin66.spring 容器
+org.springframework.boot.autoconfigure.EnableAutoConfiguration = com.yuejin66.autoconfigure.MybatisAutoConfiguration

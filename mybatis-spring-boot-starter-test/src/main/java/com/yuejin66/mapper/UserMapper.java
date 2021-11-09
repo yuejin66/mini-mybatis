@@ -1,6 +1,6 @@
-package com.yuejin66.mybatis.mapper;
+package com.yuejin66.mapper;
 
-import com.yuejin66.mybatis.po.User;
+import com.yuejin66.po.User;
 
 import java.util.List;
 

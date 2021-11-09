@@ -1,4 +1,4 @@
-package com.yuejin66.mybatis.spring;
+package com.yuejin66.spring;
 
 import com.yuejin66.mybatis.SqlSessionFactory;
 import org.springframework.beans.BeansException;
@@ -26,11 +26,10 @@ public class MapperScannerConfigurer implements BeanDefinitionRegistryPostProces
 
     private String basePackage;
 
-    private SqlSessionFactory sqlSessionFactory;
-
     @Override
     public void postProcessBeanDefinitionRegistry(BeanDefinitionRegistry registry) throws BeansException {
         try {
+            // classpath*:com.yuejin66/**/mapper/**/*.class
             String packageSearchPath = "classpath*:" + basePackage.replace('.', '/') + "/**/*.class";
 
             ResourcePatternResolver resourcePatternResolver = new PathMatchingResourcePatternResolver();
@@ -45,7 +44,6 @@ public class MapperScannerConfigurer implements BeanDefinitionRegistryPostProces
                 beanDefinition.setSource(resource);
                 beanDefinition.setScope("singleton");
                 beanDefinition.getConstructorArgumentValues().addGenericArgumentValue(beanDefinition.getBeanClassName());
-                beanDefinition.getConstructorArgumentValues().addGenericArgumentValue(sqlSessionFactory);
                 beanDefinition.setBeanClass(MapperFactoryBean.class);
 
                 BeanDefinitionHolder definitionHolder = new BeanDefinitionHolder(beanDefinition, beanName);
@@ -63,9 +61,5 @@ public class MapperScannerConfigurer implements BeanDefinitionRegistryPostProces
 
     public void setBasePackage(String basePackage) {
         this.basePackage = basePackage;
-    }
-
-    public void setSqlSessionFactory(SqlSessionFactory sqlSessionFactory) {
-        this.sqlSessionFactory = sqlSessionFactory;
     }
 }

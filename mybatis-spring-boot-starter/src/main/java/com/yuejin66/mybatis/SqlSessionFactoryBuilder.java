@@ -4,13 +4,15 @@ import org.dom4j.Document;
 import org.dom4j.DocumentException;
 import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.xml.sax.InputSource;
 
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.Reader;
 import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -24,57 +26,27 @@ import java.util.regex.Pattern;
 public class SqlSessionFactoryBuilder {
 
     /**
-     * 构建实例化元素
-     * 用来解析 xml 文件，以及 初始化 SqlSession 工厂类 DefaultSqlSessionFactory。
+     * 改造成更符合 YML 配置方式的加载处理
      *
-     * @param reader
-     * @return
+     * @param connection         数据库链接
+     * @param packageSearchPath  xml包的路径信息
+     * @return                   factory
+     * @throws IOException       IOException
+     * @throws DocumentException DocumentException
      */
-    public DefaultSqlSessionFactory build(Reader reader) {
-        SAXReader saxReader = new SAXReader();
-        try {
-            // saxReader.setEntityResolver(new XMLMapperEntityResolver()); // 不联网也能解析 xml
-            Document document = saxReader.read(new InputSource(reader));
-            Configuration configuration = parseConfiguration(document.getRootElement());
-            return new DefaultSqlSessionFactory(configuration);
-        } catch (DocumentException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
-    // 解析配置。获取两个配置，数据库的链接信息 dataSource 和对数据库操作语句的解析 mappers。
-    private Configuration parseConfiguration(Element root) {
+    public DefaultSqlSessionFactory build(Connection connection, String packageSearchPath) throws IOException, DocumentException {
         Configuration configuration = new Configuration();
-        configuration.setDataSource(dataSource(root.selectNodes("//dataSource")));
-        configuration.setConnection(connection(configuration.dataSource));
-        configuration.setMapperElement(mapperElement(root.selectNodes("mappers")));
-        return configuration;
-    }
-
-    // 获取数据源配置信息
-    private Map<String, String> dataSource(List<Element> list) {
-        HashMap<String, String> dataSource = new HashMap<>(4);
-        Element element = list.get(0);
-        List content = element.content();
-        for (Object o : content) {
-            Element e = (Element) o;
-            String name = e.attributeValue("name");
-            String value = e.attributeValue("value");
-            dataSource.put(name, value);
+        configuration.setConnection(connection);
+        // 读取配置
+        PathMatchingResourcePatternResolver resourcePatternResolver = new PathMatchingResourcePatternResolver();
+        Resource[] resources = resourcePatternResolver.getResources(packageSearchPath);
+        List<Element> list = new ArrayList<>(resources.length);
+        for (Resource resource : resources) {
+            Document document = new SAXReader().read(new InputSource(new InputStreamReader(resource.getInputStream())));
+            list.add(document.getRootElement());
         }
-        return dataSource;
-    }
-
-    // 链接数据库。如果要链接多套数据库可以在这里扩展。
-    private Connection connection(Map<String, String> dataSource) {
-        try {
-            Class.forName(dataSource.get("driver"));
-            return DriverManager.getConnection(dataSource.get("url"), dataSource.get("username"), dataSource.get("password"));
-        } catch (ClassNotFoundException | SQLException e) {
-            e.printStackTrace();
-        }
-        return null;
+        configuration.setMapperElement(mapperElement(list));
+        return new DefaultSqlSessionFactory(configuration);
     }
 
     // 解析 SQL 语句

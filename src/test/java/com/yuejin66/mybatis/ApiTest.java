@@ -24,7 +24,7 @@ public class ApiTest {
             SqlSessionFactory sqlMapper = new SqlSessionFactoryBuilder().build(reader);
             SqlSession session = sqlMapper.openSession();
             try {
-                User user = session.selectOne("com.yuejin66.mybatis.mapper.UserMapper.queryUserInfoById", 1L);
+                User user = session.selectOne("com.yuejin66.com.yuejin66.mybatis.mapper.UserMapper.queryUserInfoById", 1L);
                 System.out.println(user);
             } finally {
                 session.close();
@@ -44,7 +44,7 @@ public class ApiTest {
             SqlSessionFactory sqlMapper = new SqlSessionFactoryBuilder().build(reader);
             SqlSession session = sqlMapper.openSession();
             try {
-                List<User> userList = session.selectList("com.yuejin66.mybatis.mapper.UserMapper.queryUserInfo", "团团");
+                List<User> userList = session.selectList("com.yuejin66.com.yuejin66.mybatis.mapper.UserMapper.queryUserInfo", "团团");
                 userList.forEach(System.out::println);
             } finally {
                 session.close();

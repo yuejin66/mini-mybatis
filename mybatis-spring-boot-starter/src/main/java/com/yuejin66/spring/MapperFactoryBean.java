@@ -1,4 +1,4 @@
-package com.yuejin66.mybatis.spring;
+package com.yuejin66.spring;
 
 import com.yuejin66.mybatis.SqlSession;
 import com.yuejin66.mybatis.SqlSessionFactory;
@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.FactoryBean;
 
+import javax.annotation.Resource;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Proxy;
 
@@ -19,21 +20,25 @@ public class MapperFactoryBean<T> implements FactoryBean<T> {
 
     private Class<T> mapperInterface;
 
+    @Resource
     private SqlSessionFactory sqlSessionFactory;
 
-    public MapperFactoryBean(Class<T> mapperInterface, SqlSessionFactory sqlSessionFactory) {
+    public MapperFactoryBean(Class<T> mapperInterface) {
         this.mapperInterface = mapperInterface;
-        this.sqlSessionFactory = sqlSessionFactory;
     }
 
     @Override
     public T getObject() throws Exception {
         InvocationHandler handler = (Proxy, method, args) -> {
             log.info("你被代理了，执行 SQL 操作！{}", method.getName());
-            if ("toString".equals(method.getName())) return null; // 排除 object 方法
+            try {
+                SqlSession session = sqlSessionFactory.openSession();
                 try {
-                    return sqlSessionFactory.openSession().selectOne(mapperInterface.getName() + "." + method.getName(), args[0]);
-                } catch (Exception e) {
+                    return session.selectOne(mapperInterface.getName() + "." + method.getName(), args[0]);
+                } finally {
+                    session.close();
+                }
+            } catch (Exception e) {
                 e.printStackTrace();
             }
             return method.getReturnType().newInstance();
@@ -43,11 +48,6 @@ public class MapperFactoryBean<T> implements FactoryBean<T> {
 
     @Override
     public Class<?> getObjectType() {
-        return mapperInterface;
-    }
-
-    @Override
-    public boolean isSingleton() {
-        return true;
+        return null;
     }
 }
