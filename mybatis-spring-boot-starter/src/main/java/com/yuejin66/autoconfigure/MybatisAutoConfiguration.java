@@ -36,14 +36,13 @@ import java.sql.SQLException;
 public class MybatisAutoConfiguration implements InitializingBean {
 
     // 实例化 SqlSession 链接工厂
-    @Bean("sqlSessionFactory")
+    @Bean
     @ConditionalOnMissingBean
     public SqlSessionFactory sqlSessionFactory(Connection connection, MybatisProperties mybatisProperties) throws IOException, DocumentException {
         return new SqlSessionFactoryBuilder().build(connection, mybatisProperties.getMapperLocations());
     }
 
     // 实例化数据库链接
-//    @Bean("connection")
     @Bean
     @ConditionalOnMissingBean
     public Connection connection(MybatisProperties mybatisProperties) {

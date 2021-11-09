@@ -52,18 +52,9 @@ public class SqlSessionFactoryBuilder {
     // 解析 SQL 语句
     private Map<String, XNode> mapperElement(List<Element> list) {
         Map<String, XNode> map = new HashMap<>();
-        Element element = list.get(0);
-        List content = element.content();
-        for (Object o : content) {
-            Element e = (Element) o;
-            String resource = e.attributeValue("resource");
-            try {
-                Reader reader = Resources.getResourceAsReader(resource);
-                SAXReader saxReader = new SAXReader();
-                Document document = saxReader.read(new InputSource(reader));
-                Element root = document.getRootElement();
+        for (Element root : list) {
+                // 命名空间
                 String namespace = root.attributeValue("namespace");
-
                 // SELECT
                 List<Element> selectNodes = root.selectNodes("select");
                 for (Element node : selectNodes) {
@@ -90,9 +81,6 @@ public class SqlSessionFactoryBuilder {
                     xNode.setParameter(parameter);
                     map.put(namespace + '.' + id, xNode);
                 }
-            } catch (IOException | DocumentException ex) {
-                ex.printStackTrace();
-            }
         }
         return map;
     }
